@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>보도사진 데일리 리포트</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --lgu:#C9006B; --lgu-bg:#FCE8F2; --lgu-t:#7A003F;
+  --skt:#E22024; --skt-bg:#FEF0F0; --skt-t:#8B1010;
+  --kt:#1A56DB;  --kt-bg:#EBF5FF;  --kt-t:#1E3A8A;
+  --et:#0D5932;  --et-bg:#ECFDF5;  --et-t:#065F46;
+  --border:#E4E4E0; --bg:#F3F3F0; --card:#FFF;
+  --t1:#111; --t2:#555; --t3:#999;
+  --mono:'IBM Plex Mono',monospace;
+  --sans:'Noto Sans KR',sans-serif;
+  --gap:14px; --r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--sans);background:var(--bg);color:var(--t1);font-size:13px;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:200;background:rgba(243,243,240,.95);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(–border);padding:0 18px;height:50px;display:flex;align-items:center;justify-content:space-between;}
+.tb-left{display:flex;align-items:center;gap:10px;}
+.logo{width:30px;height:30px;border-radius:7px;background:var(–t1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.tb-title{font-size:14px;font-weight:700;letter-spacing:-.3px;}
+.tb-date{font-family:var(–mono);font-size:10px;color:var(–t3);}
+.tb-right{display:flex;gap:6px;}
+.icon-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(–border);background:var(–card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(–t2);transition:background .12s;}
+.icon-btn:hover{background:var(–bg);}
+.icon-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* TABS */
+.tabs{background:var(–card);border-bottom:1px solid var(–border);display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 14px;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;font-size:12px;font-weight:500;padding:11px 14px;color:var(–t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s,border-color .12s;}
+.tab:hover{color:var(–t2);}
+.tab.on{color:var(–t1);font-weight:700;border-bottom-color:var(–t1);}
+.tab-n{font-family:var(–mono);font-size:9px;color:var(–t3);margin-left:3px;}
+
+/* SHORTCUT BAR */
+.sc-bar{background:var(–card);border-bottom:1px solid var(–border);padding:7px 14px;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;}
+.sc-bar::-webkit-scrollbar{display:none;}
+.sc-lbl{font-size:9px;font-weight:700;color:var(–t3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
+.sc-a{flex-shrink:0;font-size:10px;font-weight:600;padding:4px 10px;border-radius:4px;border:1px solid var(–border);background:var(–card);color:var(–t2);text-decoration:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:background .12s;}
+.sc-a:hover{background:var(–bg);}
+.sc-lgu{border-left:3px solid var(–lgu);}
+.sc-skt{border-left:3px solid var(–skt);}
+.sc-kt{border-left:3px solid var(–kt);}
+.sc-et{border-left:3px solid var(–et);}
+.sc-ha{border-left:3px solid #7C3AED;}
+.sc-nb{border-left:3px solid #059669;}
+
+/* STATS */
+.statsrow{background:var(–card);border-bottom:1px solid var(–border);display:grid;grid-template-columns:repeat(5,1fr);}
+.stat{padding:11px 14px;border-right:1px solid var(–border);}
+.stat:last-child{border-right:none;}
+.stat-lbl{font-size:9px;color:var(–t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.stat-num{font-family:var(–mono);font-size:20px;font-weight:500;line-height:1;margin-bottom:2px;}
+.stat-sub{font-size:9px;color:var(–t3);}
+
+/* FILTER BAR */
+.fbar{background:var(–card);border-bottom:1px solid var(–border);padding:7px 14px;display:flex;align-items:center;gap:5px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;}
+.fbar::-webkit-scrollbar{display:none;}
+.flbl{font-size:9px;font-weight:700;color:var(–t3);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
+.chip{font-family:var(–sans);font-size:11px;font-weight:500;padding:4px 10px;border-radius:4px;border:1px solid var(–border);background:transparent;color:var(–t2);cursor:pointer;flex-shrink:0;transition:all .12s;white-space:nowrap;}
+.chip:hover{border-color:#aaa;color:var(–t1);}
+.chip.on{background:var(–t1);color:#fff;border-color:var(–t1);}
+.chip.lgu-on{background:var(–lgu);color:#fff;border-color:var(–lgu);}
+.chip.skt-on{background:var(–skt);color:#fff;border-color:var(–skt);}
+.chip.kt-on{background:var(–kt);color:#fff;border-color:var(–kt);}
+.vsep{width:1px;height:14px;background:var(–border);flex-shrink:0;}
+
+/* PHOTO GRID */
+.sw{padding:var(–gap);}
+.pg{display:grid;grid-template-columns:repeat(2,1fr);gap:var(–gap);}
+@media(min-width:600px){.pg{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:900px){.pg{grid-template-columns:repeat(4,1fr);}}
+@media(min-width:1200px){.pg{grid-template-columns:repeat(5,1fr);}}
+
+.pc{background:var(–card);border-radius:var(–r);border:1px solid var(–border);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .2s,transform .2s;}
+.pc:hover{box-shadow:0 6px 20px rgba(0,0,0,.1);transform:translateY(-2px);}
+.co-bar{height:3px;width:100%;}
+.co-bar.lgu{background:var(–lgu);}
+.co-bar.skt{background:var(–skt);}
+.co-bar.kt{background:var(–kt);}
+.tw{position:relative;aspect-ratio:3/2;overflow:hidden;background:var(–bg);}
+.th{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;}
+.pc:hover .th{transform:scale(1.04);}
+.tph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(–t3);font-size:11px;background:var(–bg);}
+.ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 55%);opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;}
+.pc:hover .ov{opacity:1;}
+.ov-a{font-size:10px;font-weight:600;padding:4px 9px;border-radius:4px;background:rgba(255,255,255,.95);color:#111;text-decoration:none;display:inline-flex;align-items:center;gap:3px;}
+.cb{padding:10px 12px 12px;}
+.cm{display:flex;align-items:center;gap:4px;margin-bottom:6px;flex-wrap:wrap;}
+.badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.2px;}
+.b-lgu{background:var(–lgu-bg);color:var(–lgu-t);}
+.b-skt{background:var(–skt-bg);color:var(–skt-t);}
+.b-kt{background:var(–kt-bg);color:var(–kt-t);}
+.b-cat{background:var(–bg);color:var(–t2);font-weight:400;}
+.cdate{font-family:var(–mono);font-size:9px;color:var(–t3);margin-left:auto;}
+.ct{font-size:12px;font-weight:600;color:var(–t1);line-height:1.5;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cd{font-size:11px;color:var(–t2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ca{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.clink{font-size:10px;color:#2563EB;text-decoration:none;display:inline-flex;align-items:center;gap:2px;}
+.clink:hover{text-decoration:underline;}
+.acbtn{font-size:10px;font-weight:500;padding:3px 8px;border-radius:3px;background:var(–bg);color:var(–t2);border:1px solid var(–border);cursor:pointer;margin-left:auto;display:inline-flex;align-items:center;gap:3px;transition:all .12s;}
+.acbtn:hover{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;}
+
+/* ANALYSIS PANEL */
+.ap{display:none;border-top:1px solid var(–border);background:#F8FAFF;padding:11px 12px;}
+.ap.show{display:block;animation:sd .18s ease;}
+@keyframes sd{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.apg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:7px;}
+.apb{background:#fff;border:1px solid #DBEAFE;border-radius:4px;padding:7px 9px;}
+.apl{font-size:9px;color:#60A5FA;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;}
+.apv{font-size:11px;color:var(–t1);line-height:1.5;}
+.api{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:8px 10px;}
+.apil{font-size:9px;color:#1D4ED8;font-weight:700;margin-bottom:2px;}
+.apiv{font-size:11px;color:#1E40AF;line-height:1.6;}
+
+/* MEDIA GRID */
+.mg{display:grid;grid-template-columns:repeat(2,1fr);gap:var(–gap);}
+@media(min-width:600px){.mg{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:900px){.mg{grid-template-columns:repeat(4,1fr);}}
+@media(min-width:1200px){.mg{grid-template-columns:repeat(5,1fr);}}
+
+.mc{background:var(–card);border-radius:var(–r);border:1px solid var(–border);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .2s,transform .2s;}
+.mc:hover{box-shadow:0 6px 20px rgba(0,0,0,.1);transform:translateY(-2px);}
+.mw{aspect-ratio:16/9;overflow:hidden;background:var(–bg);position:relative;}
+.mth{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.mc:hover .mth{transform:scale(1.04);}
+.mph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(–t3);font-size:10px;background:var(–bg);}
+.mov{position:absolute;inset:0;background:rgba(0,0,0,.42);opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;justify-content:flex-end;padding:7px;}
+.mc:hover .mov{opacity:1;}
+.mb{padding:9px 10px 11px;}
+.mm{display:flex;align-items:center;gap:4px;margin-bottom:5px;flex-wrap:wrap;}
+.mbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;}
+.s-연합뉴스{background:#EBF5FF;color:#1A56DB;}
+.s-뉴시스{background:#ECFDF5;color:#065F46;}
+.s-뉴스1{background:#FFF7ED;color:#9A3412;}
+.s-전자신문{background:#FEF2F2;color:#991B1B;}
+.s-디지털타임스{background:#EDE9FE;color:#4C1D95;}
+.s-디지털데일리{background:#FEF9C3;color:#713F12;}
+.s-ZDNet{background:#ECFDF5;color:#065F46;}
+.s-블로터{background:#F5F3FF;color:#4C1D95;}
+.s-IT조선{background:#FFF1F2;color:#881337;}
+.s-IT동아{background:#EFF6FF;color:#1E3A8A;}
+.mt{font-size:11px;font-weight:600;color:var(–t1);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px;}
+.md{font-size:10px;color:var(–t2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mlink{font-size:10px;color:#2563EB;text-decoration:none;display:inline-flex;align-items:center;gap:2px;margin-top:5px;}
+
+/* REPORTER */
+.rw{padding:var(–gap);}
+.rhead{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.rtitle{font-size:13px;font-weight:700;}
+.rdesc{font-size:11px;color:var(–t3);margin-left:auto;}
+.rtabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.rtab{font-size:11px;font-weight:600;padding:5px 13px;border-radius:99px;border:1px solid var(–border);cursor:pointer;background:var(–card);color:var(–t2);transition:all .12s;}
+.rtab:hover{border-color:var(–et);color:var(–et);}
+.rtab.on{background:var(–et);color:#fff;border-color:var(–et);}
+.rgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(–gap);}
+@media(min-width:600px){.rgrid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:900px){.rgrid{grid-template-columns:repeat(4,1fr);}}
+.rc{background:var(–card);border-radius:var(–r);border:1px solid var(–border);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .2s,transform .2s;border-top:3px solid var(–et);}
+.rc:hover{box-shadow:0 6px 20px rgba(0,0,0,.1);transform:translateY(-2px);}
+.rcw{aspect-ratio:3/2;overflow:hidden;background:var(–bg);position:relative;}
+.rct{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.rc:hover .rct{transform:scale(1.04);}
+.rcph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(–t3);font-size:11px;background:var(–bg);}
+.rcov{position:absolute;inset:0;background:rgba(0,0,0,.42);opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;justify-content:flex-end;padding:7px;}
+.rc:hover .rcov{opacity:1;}
+.rcb{padding:9px 11px 11px;}
+.rcm{display:flex;align-items:center;gap:4px;margin-bottom:5px;}
+.s-박지호{background:#EFF6FF;color:#1E3A8A;}
+.s-이동근{background:#F0FDF4;color:#166534;}
+.s-김민수{background:#FDF4FF;color:#6B21A8;}
+.rct2{font-size:12px;font-weight:600;color:var(–t1);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px;}
+.rlink{font-size:10px;color:#2563EB;text-decoration:none;display:inline-flex;align-items:center;gap:2px;margin-top:5px;}
+
+/* ANALYSIS */
+.aw{padding:var(–gap);display:flex;flex-direction:column;gap:14px;}
+.ast{font-size:12px;font-weight:700;color:var(–t1);display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.ag3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:600px){.ag3{grid-template-columns:1fr;}}
+.abox{background:var(–card);border:1px solid var(–border);border-radius:var(–r);padding:13px 15px;}
+.aco{font-size:11px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.cdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.arow{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid var(–border);font-size:11px;color:var(–t1);line-height:1.5;}
+.arow:last-child{border-bottom:none;}
+.ark{font-size:12px;flex-shrink:0;}
+.aig{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+@media(max-width:600px){.aig{grid-template-columns:1fr;}}
+.ains{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(–r);padding:10px 12px;}
+.ainsl{font-size:9px;color:#1D4ED8;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;}
+.ainsv{font-size:11px;color:#1E40AF;line-height:1.6;}
+.abtns{display:flex;gap:6px;flex-wrap:wrap;}
+.abtn{font-family:var(–sans);font-size:11px;font-weight:500;padding:7px 12px;border-radius:5px;border:1px solid var(–border);background:var(–card);color:var(–t2);cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:background .12s;}
+.abtn:hover{background:var(–bg);}
+
+/* EMPTY / FOOTER */
+.empty{padding:36px 16px;text-align:center;color:var(–t3);font-size:13px;}
+.footer{background:var(–card);border-top:1px solid var(–border);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.fnote{font-size:10px;color:var(–t3);}
+.flinks{display:flex;gap:10px;flex-wrap:wrap;}
+.flink{font-size:10px;color:#2563EB;text-decoration:none;}
+.flink:hover{text-decoration:underline;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pc,.mc,.rc{animation:fadeUp .25s ease both;}
+</style>
+
+</head>
+<body>
+
+<header class="topbar">
+  <div class="tb-left">
+    <div class="logo">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </div>
+    <div>
+      <div class="tb-title">보도사진 데일리</div>
+      <div class="tb-date" id="today-date">—</div>
+    </div>
+  </div>
+  <div class="tb-right">
+    <button class="icon-btn" onclick="refresh()" title="새로고침">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tab on" onclick="sw('press',this)">보도사진 <span class="tab-n" id="tc-press"></span></div>
+  <div class="tab" onclick="sw('media',this)">매체 모니터 <span class="tab-n" id="tc-media"></span></div>
+  <div class="tab" onclick="sw('reporter',this)">전자신문 기자 <span class="tab-n" id="tc-rep"></span></div>
+  <div class="tab" onclick="sw('analysis',this)">촬영 컨셉 분석</div>
+</nav>
+
+<div class="sc-bar">
+  <span class="sc-lbl">뉴스룸</span>
+  <a class="sc-a sc-lgu" href="https://news.lguplus.com" target="_blank">LGU+ ↗</a>
+  <a class="sc-a sc-skt" href="https://news.sktelecom.com" target="_blank">SKT ↗</a>
+  <a class="sc-a sc-kt"  href="https://corp.kt.com/html/promote/news/report_list.html" target="_blank">KT ↗</a>
+  <a class="sc-a sc-et"  href="https://www.etnews.com" target="_blank">전자신문 ↗</a>
+  <a class="sc-a sc-ha"  href="https://www.helloarchive.co.kr" target="_blank">헬로아카이브 ↗</a>
+  <a class="sc-a sc-nb"  href="http://www.newsbank.co.kr" target="_blank">뉴스뱅크 ↗</a>
+</div>
+
+<!-- 보도사진 -->
+
+<section id="sec-press">
+  <div class="statsrow">
+    <div class="stat"><div class="stat-lbl">총 수집</div><div class="stat-num" id="s-total">—</div><div class="stat-sub">3사 합산</div></div>
+    <div class="stat"><div class="stat-lbl">LGU+</div><div class="stat-num" id="s-lgu" style="color:var(--lgu)">—</div><div class="stat-sub">자사</div></div>
+    <div class="stat"><div class="stat-lbl">SKT</div><div class="stat-num" id="s-skt" style="color:var(--skt)">—</div><div class="stat-sub">경쟁사</div></div>
+    <div class="stat"><div class="stat-lbl">KT</div><div class="stat-num" id="s-kt" style="color:var(--kt)">—</div><div class="stat-sub">경쟁사</div></div>
+    <div class="stat"><div class="stat-lbl">최신</div><div class="stat-num" style="font-size:12px;padding-top:4px;" id="s-latest">—</div><div class="stat-sub">최근 업데이트</div></div>
+  </div>
+  <div class="fbar" id="pfbar">
+    <span class="flbl">회사</span>
+    <button class="chip on" onclick="setPC('all',this)">전체</button>
+    <button class="chip" onclick="setPC('LGU+',this)">LGU+</button>
+    <button class="chip" onclick="setPC('SKT',this)">SKT</button>
+    <button class="chip" onclick="setPC('KT',this)">KT</button>
+    <div class="vsep"></div>
+    <span class="flbl">분야</span>
+    <button class="chip" onclick="setPCat('AI·신사업',this)">AI</button>
+    <button class="chip" onclick="setPCat('5G·네트워크',this)">5G</button>
+    <button class="chip" onclick="setPCat('협약·파트너십',this)">협약</button>
+    <button class="chip" onclick="setPCat('ESG·사회공헌',this)">ESG</button>
+    <button class="chip" onclick="setPCat('신제품·서비스',this)">신서비스</button>
+  </div>
+  <div class="sw">
+    <div id="press-grid" class="pg"></div>
+    <div id="press-empty" class="empty" style="display:none;">해당 조건의 보도사진이 없습니다.</div>
+  </div>
+</section>
+
+<!-- 매체 모니터 -->
+
+<section id="sec-media" style="display:none;">
+  <div class="fbar" id="mfbar">
+    <span class="flbl">유형</span>
+    <button class="chip on" onclick="setMT('all',this)">전체</button>
+    <button class="chip" onclick="setMT('뉴스통신사',this)">뉴스통신사</button>
+    <button class="chip" onclick="setMT('IT전문지',this)">IT 전문지</button>
+    <div class="vsep"></div>
+    <button class="chip" onclick="setMS('연합뉴스',this)">연합뉴스</button>
+    <button class="chip" onclick="setMS('뉴시스',this)">뉴시스</button>
+    <button class="chip" onclick="setMS('뉴스1',this)">뉴스1</button>
+    <button class="chip" onclick="setMS('전자신문',this)">전자신문</button>
+    <button class="chip" onclick="setMS('블로터',this)">블로터</button>
+    <button class="chip" onclick="setMS('ZDNet',this)">ZDNet</button>
+    <button class="chip" onclick="setMS('IT조선',this)">IT조선</button>
+    <button class="chip" onclick="setMS('디지털데일리',this)">디지털데일리</button>
+    <button class="chip" onclick="setMS('IT동아',this)">IT동아</button>
+  </div>
+  <div class="sw">
+    <div id="media-grid" class="mg"></div>
+    <div id="media-empty" class="empty" style="display:none;">해당 조건의 기사가 없습니다.</div>
+  </div>
+</section>
+
+<!-- 전자신문 기자 -->
+
+<section id="sec-reporter" style="display:none;" class="rw">
+  <div class="rhead">
+    <div class="rtitle">📷 전자신문 기자별 취재 사진</div>
+    <div class="rdesc">LGU+ 업무 관련 주요 기자 3인</div>
+  </div>
+  <div class="rtabs">
+    <button class="rtab on" onclick="setRep('all',this)">전체</button>
+    <button class="rtab" onclick="setRep('박지호',this)">박지호 기자</button>
+    <button class="rtab" onclick="setRep('이동근',this)">이동근 기자</button>
+    <button class="rtab" onclick="setRep('김민수',this)">김민수 기자</button>
+  </div>
+  <div id="rep-grid" class="rgrid"></div>
+  <div id="rep-empty" class="empty" style="display:none;">해당 기자의 기사가 없습니다.</div>
+</section>
+
+<!-- 촬영 컨셉 분석 -->
+
+<section id="sec-analysis" style="display:none;" class="aw">
+  <div>
+    <div class="ast">📐 3사 촬영 패턴 비교</div>
+    <div class="ag3">
+      <div class="abox">
+        <div class="aco"><div class="cdot" style="background:var(--lgu)"></div>LGU+ 패턴</div>
+        <div class="arow"><span class="ark">📐</span>광각 현장 + 네트워크 장비 클로즈업 혼용</div>
+        <div class="arow"><span class="ark">💡</span>외부 자연광 + 행사 조명. 현장감 최우선</div>
+        <div class="arow"><span class="ark">🎨</span>핑크·마젠타 브랜드 포인트, 화이트 배경</div>
+        <div class="arow"><span class="ark">👤</span>사람중심 AI — 실제 사용 장면·감정 연출</div>
+      </div>
+      <div class="abox">
+        <div class="aco"><div class="cdot" style="background:var(--skt)"></div>SKT 패턴</div>
+        <div class="arow"><span class="ark">📐</span>수평 광각, 인물 클로즈업 혼용</div>
+        <div class="arow"><span class="ark">💡</span>자연광 선호, 스튜디오 조명 최소화</div>
+        <div class="arow"><span class="ark">🎨</span>밝고 청명한 색감, 레드 포인트</div>
+        <div class="arow"><span class="ark">👤</span>CEO 현장 활동 강조, 현장감 중시</div>
+      </div>
+      <div class="abox">
+        <div class="aco"><div class="cdot" style="background:var(--kt)"></div>KT 패턴</div>
+        <div class="arow"><span class="ark">📐</span>협약식 2인 포즈, 대칭 구도 선호</div>
+        <div class="arow"><span class="ark">💡</span>실내 행사 중심, 플래시 보조광</div>
+        <div class="arow"><span class="ark">🎨</span>무채색 배경, 절제된 색감</div>
+        <div class="arow"><span class="ark">👤</span>기술 시연·공식 행사 연출 중심</div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="ast">✦ LGU+ 촬영 인사이트</div>
+    <div class="aig">
+      <div class="ains"><div class="ainsl">차별화 전략</div><div class="ainsv">SKT·KT 대비 인물 표정·감정 중심 연출로 '사람중심 AI' 브랜드 강화</div></div>
+      <div class="ains"><div class="ainsl">컨셉 제안</div><div class="ainsv">익시오 서비스 화면 + 실생활 배경 접목. 추상 기술 이미지 탈피</div></div>
+      <div class="ains"><div class="ainsl">매체 트렌드</div><div class="ainsv">전자신문 사진기자 현장 스냅 선호 — 자연스러운 액션 컷이 채택률 높음</div></div>
+    </div>
+  </div>
+  <div class="abtns">
+    <button class="abtn" onclick="alert('Claude에 \'3사 보도사진 촬영 스타일 상세 분석해줘\' 를 입력하세요.')">상세 분석 요청 ↗</button>
+    <button class="abtn" onclick="alert('Claude에 \'이번 주 LGU+ 촬영 컨셉 제안해줘\' 를 입력하세요.')">LGU+ 컨셉 제안 ↗</button>
+    <button class="abtn" onclick="alert('Claude에 \'전자신문 박지호·이동근·김민수 기자 최신 사진 스타일 분석해줘\' 를 입력하세요.')">기자 스타일 분석 ↗</button>
+  </div>
+</section>
+
+<footer class="footer">
+  <span class="fnote" id="foot-note">LGU+·SKT·KT 뉴스룸 + IT 매체 10개사 + 전자신문 기자별</span>
+  <div class="flinks">
+    <a class="flink" href="https://news.lguplus.com" target="_blank">LGU+</a>
+    <a class="flink" href="https://news.sktelecom.com" target="_blank">SKT</a>
+    <a class="flink" href="https://corp.kt.com/html/promote/news/report_list.html" target="_blank">KT</a>
+    <a class="flink" href="https://www.etnews.com" target="_blank">전자신문</a>
+  </div>
+</footer>
+
+<script>
+const EXT=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+const CAM=`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+
+const PRESS=[
+  {co:'LGU+',cat:'신제품·서비스',title:'LGU+ 홈 비대면 서비스 월 6만건 돌파',desc:'단말 회수·상품변경 개통의 54%를 방문 없이 처리. 비대면 서비스 영역 본격 확대.',date:'2026.05.10',img:'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=70',url:'https://news.lguplus.com',analysis:{subject:'홈매니저 비대면 서비스 현장 컷',framing:'생활 밀착형 미디엄 샷',tone:'밝은 실내 자연광',insight:'고객 편의 장면 연출이 공감도 높음'}},
+  {co:'KT',cat:'ESG·사회공헌',title:'KT 정보보안실 통합 — AI 제로트러스트 전면 도입',desc:'분산된 보안 기능 정보보안실로 통합. 경기도 과천 KT 관제센터 직원들 실시간 보안 관제 업무 수행.',date:'2026.05.08',img:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=70',url:'https://www.ddaily.co.kr/page/view/2026050709535713188',analysis:{subject:'보안 관제센터 직원 근무 장면',framing:'미디엄 샷, 업무 환경',tone:'어두운 배경 + 화면 빛',insight:'어두운 톤이 무게감 — 밝은 컨트롤센터 연출도 전문성 강조에 효과'}},
+  {co:'SKT',cat:'신제품·서비스',title:'SKT 에이닷 구독 캘린더 출시 — 하나증권·CU 혜택 한눈에',desc:'하나증권·CU와 협력, 금융 정보·편의점 혜택을 캘린더 일정으로 제공.',date:'2026.05.07',img:'https://news-static.sktelecom.com/wp-content/uploads/2026/05/%EC%82%AC%EC%A7%841SKT-%EC%97%90%EC%9D%B4%EB%8B%B7-%E2%80%98%EA%B5%AC%EB%8F%85-%EC%BA%98%EB%A6%B0%EB%8D%94%EB%A1%9C-%EB%86%93%EC%B9%98%EA%B8%B0-%EC%89%AC%EC%9A%B4-%ED%95%A0%EC%9D%B8%C2%B7%ED%98%9C%ED%83%9D-%EC%9D%BC%EC%A0%95-%EC%B1%99%EA%B2%A8%EC%A4%80%EB%8B%A4_fb.jpg',url:'https://news.sktelecom.com/224601',analysis:{subject:'앱 UI 화면 + 스마트폰 손에 쥔 연출',framing:'클로즈업·제품 중심',tone:'밝은 파스텔, 화이트 배경',insight:'서비스 앱이 메인 — 실제 사용 장면으로 생동감 확보'}},
+  {co:'SKT',cat:'ESG·사회공헌',title:'SKT 2026 DJ BIC 월드지수 편입 — 글로벌 ESG 리더십',desc:'글로벌 ESG 리딩 기업 위상 확인. 지속가능경영지수 월드지수 편입.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1542601906897-edc9a2978374?w=600&q=70',url:'https://news.sktelecom.com/',analysis:{subject:'인포그래픽 + 상징 이미지',framing:'와이드샷, 데이터 시각화',tone:'클린 화이트, 브랜드 컬러',insight:'추상적 ESG 이미지 — 현장 활동 사진 병행으로 구체성 보완'}},
+  {co:'SKT',cat:'ESG·사회공헌',title:'어린이날 꼬마 사원들 SKT 본사 출근 — CEO 명예사원증 수여',desc:'정재헌 CEO가 구성원 350 가족 초청. SKT 주니어 명예사원 임명장 수여 행사.',date:'2026.05.05',img:'https://news-static.sktelecom.com/wp-content/uploads/2026/05/%EC%82%AC%EC%A7%841.%EC%98%A4%EB%8A%98%EC%9D%80-%EB%82%98%EB%8F%84-SKT-%EA%B5%AC%EC%84%B1%EC%9B%90.-%EC%96%B4%EB%A6%B0%EC%9D%B4%EB%82%A0-%EB%B3%B8%EC%82%AC-%EC%B0%BE%EC%95%84%EC%98%A8-%EA%BC%AC%EB%A7%88-%EC%82%AC%EC%9B%90%EB%93%A4FB.jpg',url:'https://news.sktelecom.com/224565',analysis:{subject:'CEO와 아이들 현장 스냅 + 임명장 수여',framing:'중간 거리, 자연스러운 현장감',tone:'따뜻하고 밝은 자연광',insight:'CEO 인간적 면모 — 스냅 느낌 연출이 효과적'}},
+  {co:'SKT',cat:'AI·신사업',title:'SKT NAB 쇼 2026 라이브 투 카트 올해의 제품상 수상',desc:'AI 미디어 커머스 솔루션으로 한국 기업 유일 수상.',date:'2026.04.29',img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=70',url:'https://news.sktelecom.com/224388',analysis:{subject:'수상 후 기념 촬영 — 전시 부스 배경',framing:'2인 나란히, 전시 배경 활용',tone:'전시장 조명 + 자연광 혼합',insight:'글로벌 현장감 강조 — 수상 트로피보다 현장 분위기 포착'}},
+  {co:'KT',cat:'5G·네트워크',title:'KT WIS 2026 AI 기반 기업 보안 솔루션 공개',desc:'AI 메일보안·클린존 DDoS 방어·제로트러스트 ZTNA 등 B2B 보안 솔루션 대거 발표.',date:'2026.04.24',img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=70',url:'https://www.etnews.com/20260424000106',analysis:{subject:'WIS 2026 전시 부스 + 솔루션 시연',framing:'부스 광각 + 담당자 설명',tone:'전시장 인공조명',insight:'부스 전경 1 + 시연 클로즈업 1 조합이 효과적'}},
+  {co:'KT',cat:'AI·신사업',title:'KT 믿:음 2.0 국내 가장 안전한 AI 모델 인정',desc:'경기도 생성형 AI 플랫폼 구축, 대법원 재판업무 지원 AI 플랫폼 등 공공 AX 확대.',date:'2026.04.20',img:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=70',url:'https://corp.kt.com/html/promote/news/report_list.html',analysis:{subject:'서버 인프라 + AI 모델 시각화',framing:'와이드, 기술 장비 중심',tone:'차가운 블루톤, 테크 무드',insight:'AI 기술 이미지 추상적 — 연구자 현장 컷 병행 필요'}},
+  {co:'KT',cat:'5G·네트워크',title:'KT WIS 2026 AX 플랫폼·6G 핵심 비전 공개',desc:'AI 네이티브 등 6대 6G 비전 발표. K RaaS 로봇 플랫폼 시연.',date:'2026.04.17',img:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=70',url:'https://corp.kt.com/html/promote/news/report_list.html',analysis:{subject:'전시 부스 전경 + 기술 시연',framing:'광각 부스 전경, 시연 클로즈업 병행',tone:'전시장 인공조명, 브랜드 컬러',insight:'부스 전경 1 + 시연 클로즈업 1 조합이 효과적'}},
+  {co:'KT',cat:'협약·파트너십',title:'KT-베트남 Viettel 글로벌 AX 파트너십 체결',desc:'글로벌 AX 사업자 도약 목표로 베트남 최대 통신사와 전략적 파트너십.',date:'2026.04.15',img:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=70',url:'https://corp.kt.com/html/promote/news/report_list.html',analysis:{subject:'글로벌 파트너 협약식 — 양사 임원 2인',framing:'상반신 클로즈업, 대칭 구도',tone:'정제된 실내 조명',insight:'해외 파트너십은 글로벌 감각 필요 — 국기 또는 글로벌 오피스 배경 활용'}},
+  {co:'LGU+',cat:'5G·네트워크',title:'LGU+ 광화문 대형 공연 현장 자율 네트워크 효과 입증',desc:'서울 광화문광장 대규모 공연 현장에서 자율 네트워크 기반 사전 예측·실시간 제어 체계로 안정적 통신 서비스 제공.',date:'2026.03.23',img:'https://news.lguplus.com/wp-content/uploads/2026/03/0323-LG유플러스-광화문-대형-공연으로-자율네트워크-기반-사전-예측·실시간-제어-효과-증명했다-세로-370x245.jpg',url:'https://news.lguplus.com/21440',analysis:{subject:'대규모 현장 광각 + 네트워크 장비 클로즈업',framing:'와이드 현장, 기술 병행',tone:'야외 자연광, 현장감 강조',insight:'기술 장비보다 실제 운용 인원 포착이 신뢰감 높임'}},
+  {co:'LGU+',cat:'신제품·서비스',title:'LGU+ Simple.Lab 광고 문체부 장관상 수상',desc:"브랜드 캠페인 'Simple.Lab'이 제34회 소비자가 뽑은 좋은 광고상 문체부 장관상(디지털 부문) 수상.",date:'2026.03.20',img:'https://news.lguplus.com/wp-content/uploads/2026/03/0321-LG-U-Simple.-Lab으로-소비자가-직접-뽑은-좋은-광고상-장관상-수상-370x245.jpg',url:'https://news.lguplus.com/21436',analysis:{subject:'시상식 수상 + 광고 크리에이티브 이미지',framing:'수상 장면 중심',tone:'밝은 실내 조명, 따뜻한 색감',insight:'자연스러운 표정 컷이 격식 포즈보다 채택률 높음'}},
+  {co:'SKT',cat:'5G·네트워크',title:'SKT-에릭슨 AI 기반 6G 네트워크 혁신 MoU 체결',desc:'AI-RAN, 5G 고도화, 개방·자율 네트워크, 6G 표준화 전방위 협력.',date:'2026.03.19',img:'https://images.unsplash.com/photo-1520869562399-e772f042f422?w=600&q=70',url:'https://news.sktelecom.com/',analysis:{subject:'MoU 서명식 — 양사 담당자 악수',framing:'좌우 대칭, 협약서 중심',tone:'실내 조명, 단정한 배경',insight:'협약식 정형 구도 — 야외 또는 현장 촬영으로 차별화'}},
+  {co:'LGU+',cat:'AI·신사업',title:'LGU+ MWC26 익시오 피지컬AI 비전 공개',desc:'AI 에이전트 익시오(ixi-O)를 물리적 세계로 확장. 익시 가디언 2.0 CTO 초이스상 수상.',date:'2026.03.04',img:'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=600&q=70',url:'https://news.lguplus.com/',analysis:{subject:'익시오+휴머노이드 로봇 전시 시연',framing:'부스 전경 + 로봇 클로즈업',tone:'전시장 인공조명, 하이테크 무드',insight:'로봇+AI 결합 시연 — 관람객 반응 컷이 임팩트 높음'}},
+];
+
+const MEDIA=[
+  {source:'전자신문',type:'IT전문지',title:'LGU+ 홈 비대면 처리 월 6만건 돌파 — 서비스 혁신 본격화',desc:'단말 회수·상품변경 54%를 방문 없이 처리. 고객 편의 혁신 가속.',date:'2026.05.10',img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=70',url:'https://www.etnews.com'},
+  {source:'디지털데일리',type:'IT전문지',title:'KT 통합 보안 거버넌스 가동 — 정보보안실 중심 체계 정비',desc:'경기도 과천 KT 관제센터 직원들이 실시간 보안 관제 업무 수행.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=70',url:'https://www.ddaily.co.kr/page/view/2026050709535713188'},
+  {source:'연합뉴스',type:'뉴스통신사',title:'통신 3사 1분기 실적 — LGU+ 유일 매출·영업익 동반 성장',desc:'AI 데이터센터가 실적 견인. LGU+ AIDC 매출 31% 증가.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=70',url:'https://www.yna.co.kr'},
+  {source:'전자신문',type:'IT전문지',title:'SKT 1Q 실적 — AI 데이터센터 매출 89% 급증',desc:'AIDC 매출 1314억원. 통신 본업 하락 AI가 상쇄.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=70',url:'https://www.etnews.com'},
+  {source:'뉴시스',type:'뉴스통신사',title:'SKT 에이닷 구독 캘린더 출시 — 하나증권·CU 혜택 한눈에',desc:'AI 에이전트로 진화 예고. 5월 프로모션 국내주식 매수 쿠폰 제공.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=70',url:'https://www.newsis.com'},
+  {source:'뉴스1',type:'뉴스통신사',title:'통신 3사 5월 가족 마케팅 경쟁 — 에버랜드·OTT·AI 총출동',desc:'요금 경쟁에서 라이프스타일 플랫폼 경쟁으로 전환.',date:'2026.05.06',img:'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=70',url:'https://www.news1.kr'},
+  {source:'ZDNet',type:'IT전문지',title:'AI EXPO KOREA 2026 개막 — 통신 3사 AI 총출동',desc:'5월 6~8일 코엑스 A홀. 각사 AI 에이전트 및 플랫폼 시연.',date:'2026.05.06',img:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=70',url:'https://zdnet.co.kr'},
+  {source:'뉴스1',type:'뉴스통신사',title:'KT 정보보안실 통합 — AI·제로트러스트 선제 방어',desc:'단순 사후 수습 아닌 실행형 보안. SKT 해킹 사태 이후 업계 보안 강화.',date:'2026.05.08',img:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=70',url:'https://www.news1.kr'},
+  {source:'전자신문',type:'IT전문지',title:'KT WIS 2026 AI 기업 보안 솔루션 공개',desc:'AI 메일보안·클린존·플렉스라인 ZTNA 등 B2B 보안 솔루션 대거.',date:'2026.04.24',img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=70',url:'https://www.etnews.com/20260424000106'},
+  {source:'IT조선',type:'IT전문지',title:'SKT-에릭슨 AI-RAN·6G MoU 체결',desc:'5G 고도화·개방 자율 네트워크. 6G 표준화 전방위 협력.',date:'2026.03.19',img:'https://images.unsplash.com/photo-1520869562399-e772f042f422?w=600&q=70',url:'https://it.chosun.com'},
+  {source:'블로터',type:'IT전문지',title:'SKT 2026년 통신·AI로 실적 회복 집중',desc:'유심 해킹 사태 여파. 가입자 회복·신규 고객 발굴에 올해 올인.',date:'2026.02.09',img:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&q=70',url:'https://www.bloter.net'},
+  {source:'IT동아',type:'IT전문지',title:'KT 믿:음 2.0 오픈소스 공개 — 국내 AI 대중화 가속',desc:'한국어 AI 모델 공개로 중소기업·스타트업 AI 활용 문턱 낮춰.',date:'2026.04.10',img:'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=70',url:'https://it.donga.com'},
+];
+
+const REPORTERS=[
+  {name:'박지호',title:'LGU+ 1분기 매출·영업익 통신 3사 중 유일 동반 성장',desc:'AIDC·모바일 성장이 동력. 매출 3.8조, 영업익 2723억.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=70',url:'https://www.etnews.com'},
+  {name:'이동근',title:'LGU+ MWC26 익시오 피지컬AI — CTO 초이스상 수상',desc:'AI 에이전트 익시오를 물리 세계로 확장. 익시 가디언 2.0 수상.',date:'2026.03.04',img:'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=600&q=70',url:'https://www.etnews.com'},
+  {name:'김민수',title:'통신 3사 데이터센터 용량 459MW 돌파 — AI 주도권 경쟁',desc:'KT 162MW, SKT·LGU+ 포함 3사 합산 459MW. 2028년 600MW 전망.',date:'2026.05.07',img:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&q=70',url:'https://www.etnews.com'},
+  {name:'박지호',title:'LGU+ 광화문 공연 현장 자율 네트워크 효과 입증',desc:'대규모 공연 현장서 사전 예측·실시간 제어 체계로 안정적 통신 제공.',date:'2026.03.23',img:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=70',url:'https://www.etnews.com'},
+  {name:'이동근',title:'KT WIS 2026 AI 기업 보안 솔루션 공개',desc:'AI 메일보안·클린존·플렉스라인 ZTNA 등 B2B 보안 솔루션 대거 선보여.',date:'2026.04.24',img:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=70',url:'https://www.etnews.com/20260424000106'},
+  {name:'김민수',title:'SKT-에릭슨 AI-RAN·6G MoU 체결',desc:'5G 고도화·개방 자율 네트워크. 6G 표준화 전방위 협력 체계 구축.',date:'2026.03.19',img:'https://images.unsplash.com/photo-1520869562399-e772f042f422?w=600&q=70',url:'https://www.etnews.com'},
+];
+
+let pComp='all',pCat='all',mType='all',mSrc='all',repName='all';
+
+function cc(co){return co==='SKT'?'skt':co==='KT'?'kt':'lgu';}
+function bc(co){return co==='SKT'?'b-skt':co==='KT'?'b-kt':'b-lgu';}
+
+function renderPress(){
+  const f=PRESS.filter(d=>(pComp==='all'||d.co===pComp)&&(pCat==='all'||d.cat===pCat));
+  document.getElementById('s-total').textContent=PRESS.length;
+  document.getElementById('s-lgu').textContent=PRESS.filter(d=>d.co==='LGU+').length;
+  document.getElementById('s-skt').textContent=PRESS.filter(d=>d.co==='SKT').length;
+  document.getElementById('s-kt').textContent=PRESS.filter(d=>d.co==='KT').length;
+  document.getElementById('s-latest').textContent=PRESS[0].date;
+  document.getElementById('tc-press').textContent='('+PRESS.length+')';
+  const g=document.getElementById('press-grid'),e=document.getElementById('press-empty');
+  if(!f.length){g.style.display='none';e.style.display='block';return;}
+  e.style.display='none';g.style.display='grid';
+  g.innerHTML=f.map(d=>{
+    const gi=PRESS.indexOf(d);
+    return `<div class="pc">
+      <div class="co-bar ${cc(d.co)}"></div>
+      <div class="tw">
+        <img class="th" src="${d.img}" alt="${d.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="tph" style="display:none;">📷 이미지 준비 중</div>
+        <div class="ov"><a class="ov-a" href="${d.url}" target="_blank">원문 ${EXT}</a></div>
+      </div>
+      <div class="cb">
+        <div class="cm"><span class="badge ${bc(d.co)}">${d.co}</span><span class="badge b-cat">${d.cat}</span><span class="cdate">${d.date}</span></div>
+        <div class="ct">${d.title}</div>
+        <div class="cd">${d.desc}</div>
+        <div class="ca">
+          <a class="clink" href="${d.url}" target="_blank">뉴스룸 ${EXT}</a>
+          <button class="acbtn" onclick="toggleAP(${gi})">${CAM} 컨셉 분석</button>
+        </div>
+      </div>
+      <div class="ap" id="ap-${gi}">
+        <div class="apg">
+          <div class="apb"><div class="apl">피사체·연출</div><div class="apv">${d.analysis.subject}</div></div>
+          <div class="apb"><div class="apl">구도·프레이밍</div><div class="apv">${d.analysis.framing}</div></div>
+          <div class="apb"><div class="apl">색감·조명</div><div class="apv">${d.analysis.tone}</div></div>
+        </div>
+        <div class="api"><div class="apil">LGU+ 인사이트</div><div class="apiv">${d.analysis.insight}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAP(i){
+  const p=document.getElementById('ap-'+i);if(!p)return;
+  document.querySelectorAll('.ap.show').forEach(el=>{if(el!==p)el.classList.remove('show');});
+  p.classList.toggle('show');
+}
+
+function renderMedia(){
+  const f=MEDIA.filter(d=>(mType==='all'||d.type===mType)&&(mSrc==='all'||d.source===mSrc));
+  document.getElementById('tc-media').textContent='('+MEDIA.length+')';
+  const g=document.getElementById('media-grid'),e=document.getElementById('media-empty');
+  if(!f.length){g.style.display='none';e.style.display='block';return;}
+  e.style.display='none';g.style.display='grid';
+  g.innerHTML=f.map(d=>`<div class="mc">
+    <div class="mw">
+      <img class="mth" src="${d.img}" alt="${d.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="mph" style="display:none;">📰 ${d.source}</div>
+      <div class="mov"><a class="ov-a" href="${d.url}" target="_blank">원문 ${EXT}</a></div>
+    </div>
+    <div class="mb">
+      <div class="mm"><span class="mbadge s-${d.source}">${d.source}</span><span class="cdate">${d.date}</span></div>
+      <div class="mt">${d.title}</div>
+      <div class="md">${d.desc}</div>
+      <a class="mlink" href="${d.url}" target="_blank">기사 보기 ${EXT}</a>
+    </div>
+  </div>`).join('');
+}
+
+function renderReporter(){
+  const f=repName==='all'?REPORTERS:REPORTERS.filter(d=>d.name===repName);
+  document.getElementById('tc-rep').textContent='('+REPORTERS.length+')';
+  const g=document.getElementById('rep-grid'),e=document.getElementById('rep-empty');
+  if(!f.length){g.style.display='none';e.style.display='block';return;}
+  e.style.display='none';g.style.display='grid';
+  g.innerHTML=f.map(d=>`<div class="rc">
+    <div class="rcw">
+      <img class="rct" src="${d.img}" alt="${d.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="rcph" style="display:none;">📷 ${d.name} 기자</div>
+      <div class="rcov"><a class="ov-a" href="${d.url}" target="_blank">원문 ${EXT}</a></div>
+    </div>
+    <div class="rcb">
+      <div class="rcm"><span class="mbadge s-${d.name}">${d.name} 기자</span><span class="cdate">${d.date}</span></div>
+      <div class="rct2">${d.title}</div>
+      <div class="md">${d.desc}</div>
+      <a class="rlink" href="${d.url}" target="_blank">기사 보기 ${EXT}</a>
+    </div>
+  </div>`).join('');
+}
+
+function setPC(v,el){
+  pComp=v;
+  document.querySelectorAll('#pfbar .chip').forEach(c=>c.classList.remove('on','skt-on','kt-on','lgu-on'));
+  if(v==='all')el.classList.add('on');
+  else if(v==='SKT')el.classList.add('skt-on');
+  else if(v==='KT')el.classList.add('kt-on');
+  else el.classList.add('lgu-on');
+  renderPress();
+}
+function setPCat(v,el){
+  pCat=pCat===v?'all':v;
+  document.querySelectorAll('#pfbar .chip').forEach(c=>{if(!['전체','LGU+','SKT','KT'].includes(c.textContent.trim()))c.classList.remove('on');});
+  if(pCat!=='all')el.classList.add('on');
+  renderPress();
+}
+function setMT(v,el){
+  mType=v;mSrc='all';
+  document.querySelectorAll('#mfbar .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');renderMedia();
+}
+function setMS(v,el){
+  mSrc=mSrc===v?'all':v;
+  document.querySelectorAll('#mfbar .chip').forEach(c=>c.classList.remove('on'));
+  if(mSrc!=='all')el.classList.add('on');
+  else document.querySelector('#mfbar .chip').classList.add('on');
+  renderMedia();
+}
+function setRep(v,el){
+  repName=v;
+  document.querySelectorAll('.rtab').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');renderReporter();
+}
+function sw(sec,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  ['press','media','reporter','analysis'].forEach(s=>{
+    document.getElementById('sec-'+s).style.display=s===sec?'block':'none';
+  });
+}
+function refresh(){
+  ['press-grid','media-grid','rep-grid'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.opacity='.4';});
+  setTimeout(()=>{
+    ['press-grid','media-grid','rep-grid'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.opacity='1';});
+    renderPress();renderMedia();renderReporter();
+  },600);
+}
+
+const now=new Date();
+const pad=n=>String(n).padStart(2,'0');
+document.getElementById('today-date').textContent=`${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
+document.getElementById('foot-note').textContent=`LGU+·SKT·KT 뉴스룸 + IT 매체 10개사 + 전자신문 기자별 | ${pad(now.getHours())}:${pad(now.getMinutes())} 수집`;
+
+renderPress();renderMedia();renderReporter();
+</script>
+
+</body>
+</html>
